@@ -1,0 +1,24 @@
+# Data (keep folder structure, not the files)
+data/raw/*
+data/processed/*
+!data/**/.gitkeep
+
+# Trained models
+models/*
+!models/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
