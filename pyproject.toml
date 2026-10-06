@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "colorcet>=3.2.1",
     "ipykernel>=7.3.0",
     "ipywidgets>=8.1.9",
     "matplotlib>=3.11.2",
@@ -16,6 +17,7 @@ dependencies = [
     "scipy>=1.17.1",
     "seaborn>=0.13.2",
     "sentence-transformers>=6.1.0",
+    "xgboost>=3.2.0",
 ]
 
 [dependency-groups]
