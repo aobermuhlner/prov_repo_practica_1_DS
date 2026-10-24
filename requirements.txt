@@ -7,3 +7,4 @@ seaborn
 ipywidgets
 sentence-transformers
 jupyter
+puncc
