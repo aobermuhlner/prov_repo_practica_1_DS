@@ -226,3 +226,12 @@ NVIDIA driver is still required. Invoke this environment's Python directly to
 retain the selected CUDA wheel. The script performs a real CUDA arithmetic and
 backward probe; `--device cuda` fails clearly if it cannot execute on the GPU,
 while `auto` falls back to CPU. Only CPU execution has been tested on this laptop.
+
+## Experiment outcome
+
+Keep this standalone MLP as the neural-network comparison. The saved baseline
+reached about **64.1% confidence_score** on the existing test split. Wider networks,
+learning-rate schedules, weight averaging and ensembles were explored, but the
+observed gains were small and uncertain. The experimental variants were discarded;
+the original train/development/calibration/test protocol and financial cleaning
+remain in this implementation.
