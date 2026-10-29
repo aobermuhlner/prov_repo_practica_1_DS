@@ -11,6 +11,7 @@ models/*
 __pycache__/
 *.py[cod]
 .venv/
+.venv-nn/
 venv/
 env/
 
