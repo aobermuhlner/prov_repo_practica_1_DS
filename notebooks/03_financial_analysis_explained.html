@@ -1,0 +1,776 @@
+<title>03 Financial Analysis Explained</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a reading column beside a sticky section rail, with charts as the widest element in each section. */
+:root {
+  --bg: #f4f7fa; --surface: #fcfdfe; --tint: #e9f0f8; --ink: #10202f; --ink-2: #435262; --muted: #5f6d7a;
+  --line: #dde3ea; --axis: #bcc6d0; --accent: #1c5cab; --seq: #1c5cab;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --off: #aab5c0;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", Consolas, ui-monospace, monospace;
+  --label: 230px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1319; --surface: #161c23; --tint: #1b2a3b; --ink: #eef2f6; --ink-2: #b9c4cf; --muted: #93a0ac;
+  --line: #2a333d; --axis: #3f4b57; --accent: #86b6ef; --seq: #3987e5;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --off: #5a6672; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #0e1319; --surface: #161c23; --tint: #1b2a3b; --ink: #eef2f6; --ink-2: #b9c4cf; --muted: #93a0ac;
+  --line: #2a333d; --axis: #3f4b57; --accent: #86b6ef; --seq: #3987e5;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --off: #5a6672; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { background: var(--bg); color: var(--ink); font: 400 17px/1.6 var(--body); }
+.shell { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 48px; max-width: 1180px; margin: 0 auto;
+  padding-block: 48px 96px; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+nav.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; display: grid; gap: 2px; font-size: 15px; }
+nav.rail b { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+nav.rail a { color: var(--ink-2); text-decoration: none; padding: 5px 10px; border-radius: 4px; }
+nav.rail a:hover { background: var(--tint); color: var(--ink); }
+main { min-width: 0; display: grid; gap: 72px; }
+section { min-width: 0; display: grid; gap: 16px; scroll-margin-top: 24px; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(32px, 5vw, 46px); font-weight: 700; letter-spacing: -.01em; }
+h2 { font-size: clamp(25px, 3.4vw, 32px); font-weight: 700; }
+h3 { font-size: 20px; font-weight: 600; margin-top: 16px; }
+p, ul, ol { margin: 0; max-width: 68ch; }
+ul, ol { padding-left: 22px; display: grid; gap: 6px; }
+.eyebrow { font: 500 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 20px; line-height: 1.45; color: var(--ink-2); }
+code { font: 400 .86em var(--mono); background: var(--tint); padding: 1px 5px; border-radius: 3px; overflow-wrap: anywhere; }
+.hyp { color: var(--muted); font-style: italic; }
+.finding { background: var(--tint); padding: 14px 18px; border-radius: 6px; max-width: 76ch; }
+.finding strong:first-child { font-family: var(--display); }
+.strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.strip div { background: var(--surface); padding: 14px; display: grid; gap: 4px; align-content: start; font-size: 15px; line-height: 1.35; }
+.strip b { font: 600 17px var(--display); }
+.strip span { color: var(--ink-2); }
+.stats { display: flex; flex-wrap: wrap; gap: 12px 44px; }
+.stats div { display: grid; }
+.stats b { font-size: 32px; font-weight: 700; line-height: 1.1; }
+.stats span { color: var(--ink-2); font-size: 15px; }
+.fig { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; }
+.fig h4 { margin: 0; font: 600 16px var(--body); }
+.fig .sub { font-size: 14.5px; color: var(--ink-2); max-width: 70ch; }
+.controls { display: flex; flex-wrap: wrap; gap: 6px; }
+.controls button, .chip { font: 500 13.5px var(--mono); padding: 5px 11px; border: 1px solid var(--axis); border-radius: 4px; background: transparent; color: var(--ink); cursor: pointer; }
+.controls button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tw { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; line-height: 1.35; }
+th { text-align: left; font: 500 12px var(--mono); color: var(--muted); padding: 7px 10px; border-bottom: 1px solid var(--axis); vertical-align: bottom; }
+td { padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+details { font-size: 15px; }
+summary { cursor: pointer; color: var(--ink-2); font-size: 14.5px; }
+details[open] summary { margin-bottom: 8px; }
+
+/* row charts */
+.plot { position: relative; display: grid; gap: 0; }
+.row { display: grid; grid-template-columns: var(--label) minmax(0, 1fr); align-items: center; min-height: 26px; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+div.row { cursor: default; }
+.row:hover .lab { color: var(--ink); }
+.lab { font-size: 14.5px; line-height: 1.15; padding-right: 12px; text-align: right; color: var(--ink-2); }
+.track { position: relative; height: 26px; }
+.gridlay { position: absolute; top: 0; bottom: 0; left: var(--label); right: 0; pointer-events: none; }
+.gridlay i { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); }
+.gridlay i.ref { background: var(--muted); }
+.axis { position: relative; height: 22px; margin-left: var(--label); font: 400 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; border-top: 1px solid var(--axis); }
+.axis span { position: absolute; top: 4px; transform: translateX(-50%); white-space: nowrap; }
+.span { position: absolute; top: 12px; height: 2px; background: var(--off); border-radius: 1px; }
+.dot { position: absolute; top: 8px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--off); box-shadow: 0 0 0 2px var(--surface); }
+.pin0 .span, .pin0 .dot { background: var(--s1); }
+.pin1 .span, .pin1 .dot { background: var(--s2); }
+.pin0 .span, .pin1 .span { height: 4px; top: 11px; }
+.pin0 .lab, .pin1 .lab { color: var(--ink); font-weight: 700; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 14px; color: var(--ink-2); align-items: center; }
+.legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: 0; }
+.m0 { background: var(--s1); border-radius: 50%; }
+.m1 { background: var(--s2); }
+.m2 { background: var(--s3); transform: rotate(45deg); }
+.mk { position: absolute; top: 8px; width: 10px; height: 10px; margin-left: -5px; box-shadow: 0 0 0 2px var(--surface); }
+.mk.m0 { top: 3px; } .mk.m2 { top: 13px; }
+#c-auc .row { padding-block: 3px; }
+.readout { min-height: 3.1em; font-size: 15.5px; }
+.bar { position: absolute; top: 7px; left: 0; height: 12px; border-radius: 0 4px 4px 0; background: var(--s1); }
+.val { position: absolute; top: 2px; font: 500 13.5px var(--mono); padding-left: 8px; white-space: nowrap; }
+.whisk { position: absolute; top: 12px; height: 2px; background: var(--off); }
+
+/* heatmap */
+.heat { display: grid; gap: 2px; min-width: 0; }
+.hrow { display: grid; grid-template-columns: var(--label) repeat(3, minmax(0, 1fr)); gap: 2px; align-items: center; }
+.hrow .lab { padding-right: 10px; }
+.hhead { font: 500 12px var(--mono); color: var(--muted); text-align: center; padding-bottom: 4px; }
+.cell { font: 500 13px var(--mono); font-variant-numeric: tabular-nums; text-align: center; padding: 3px 0; border: 0; color: var(--ink); cursor: default; border-radius: 2px; }
+.cell.hi { color: #fff; }
+.scale { height: 8px; width: 180px; max-width: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--surface), var(--seq)); border: 1px solid var(--line); }
+
+/* histogram */
+.hc { min-width: 0; width: 100%; }
+.hc svg { display: block; width: 100%; height: 250px; }
+.hc text { font: 400 12px var(--mono); fill: var(--muted); }
+.hc line.g { stroke: var(--line); }
+.hc line.a { stroke: var(--axis); }
+.hc rect.b { fill: var(--s1); }
+.hc rect.b.clip { fill: var(--s2); }
+.hc rect.b.zero { fill: var(--s3); }
+.hc rect.hit { fill: transparent; }
+
+/* crosstab, calculator */
+.xt { display: grid; grid-template-columns: auto repeat(2, minmax(0, 1fr)); gap: 2px; max-width: 560px; font-size: 14.5px; }
+.xt > div { padding: 10px 12px; }
+.xt .h { color: var(--muted); font: 500 12px var(--mono); align-self: end; }
+.xt .c { background: var(--bg); font-size: 22px; font-weight: 700; }
+.xt .c.on { background: var(--seq); color: #fff; }
+.calc { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.calc label { display: grid; gap: 4px; font-size: 14px; color: var(--ink-2); }
+.calc input { font: 500 18px var(--mono); padding: 6px 8px; width: 100%; border: 1px solid var(--axis); border-radius: 4px; background: var(--bg); color: var(--ink); }
+.calc output { font: 500 22px var(--mono); color: var(--ink); padding-top: 4px; }
+.qa { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 28px; }
+.qa div { min-width: 0; }
+.qa b { display: block; }
+.qa span { color: var(--ink-2); font-size: 15.5px; }
+#tip { position: fixed; z-index: 20; pointer-events: none; max-width: 280px; padding: 8px 10px; border-radius: 4px; background: var(--ink); color: var(--bg); font-size: 13.5px; line-height: 1.35; white-space: pre-line; }
+
+@media (max-width: 960px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 28px; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  nav.rail { position: static; display: flex; flex-wrap: wrap; gap: 2px 4px; font-size: 14.5px; }
+  nav.rail b { width: 100%; margin: 0; }
+  nav.rail a { padding: 3px 7px; background: var(--tint); }
+}
+@media (max-width: 620px) {
+  :root { --label: 0px; }
+  body { font-size: 16.5px; }
+  .fig { padding: 14px 12px; }
+  .row { grid-template-columns: minmax(0, 1fr); padding-top: 3px; }
+  .row .lab { text-align: left; padding: 0; }
+  .hrow { grid-template-columns: minmax(0, 1fr) repeat(3, 46px); }
+  .hrow .lab { font-size: 13.5px; }
+  .hhead.small { font-size: 10px; }
+  .strip, .qa { grid-template-columns: minmax(0, 1fr); }
+  .calc { grid-template-columns: minmax(0, 1fr); }
+  .stats b { font-size: 26px; }
+}
+</style>
+
+<div class="shell">
+<nav class="rail" aria-label="Sections">
+  <b>Notebook 03</b>
+  <a href="#overview">Overview</a>
+  <a href="#data">The data</a>
+  <a href="#problems">What is wrong</a>
+  <a href="#missing">Missing data</a>
+  <a href="#outliers">Outliers</a>
+  <a href="#industries">Industry differences</a>
+  <a href="#classifier">Confused pairs</a>
+  <a href="#daniel">Daniel's notebook</a>
+  <a href="#limits">Weak spots</a>
+  <a href="#questions">Likely questions</a>
+  <a href="#outputs">Every output</a>
+  <a href="#conclusions">Conclusions</a>
+</nav>
+
+<main>
+<section id="overview">
+  <div class="eyebrow">Explainer for 03_financial_analysis.ipynb</div>
+  <h1>What the financial ratios tell us about industries</h1>
+  <p class="lede">This notebook asks how to handle outliers and missing values in three financial ratios, and whether those ratios really differ between industries. No model is trained.</p>
+  <div class="strip">
+    <div><b>Diagnose</b><span>2,005 companies have zero revenue, and 62% have no EBITDA margin</span></div>
+    <div><b>Clean</b><span>Net margin std falls from 238,733 to 0.86</span></div>
+    <div><b>Compare</b><span>Asset turnover differs most by industry: effect size 0.25, large</span></div>
+    <div><b>Connect to the classifier</b><span>Only 1 of 11 confused pairs separates clearly</span></div>
+  </div>
+  <div class="finding"><strong>The version for Daniel.</strong> <code>inf</code> is information, since 97% of <code>inf</code> margins are companies with zero revenue. Extreme values are mostly real companies with tiny revenue, so we shrink them instead of deleting them. Industries do differ financially, especially on asset turnover, but most of the pairs the classifier confuses overlap heavily. That fits notebook 02, where financials add nothing beyond country.</div>
+  <p style="font-size:15px;color:var(--muted)">Results come from your saved run of 31 October 2026. The chart quartiles and histogram bins were recomputed from the same data with the same cleaning, and the medians match the notebook. Numbers marked <b>Daniel's run</b> come from the saved outputs of <code>financial_data.ipynb</code>. Phrases marked <span class="hyp">hypothesis</span> are plausible reasons that the data does not prove.</p>
+</section>
+
+<section id="data">
+  <div class="eyebrow">Notebook section 1</div>
+  <h2>The data</h2>
+  <div class="stats">
+    <div><b>27,128</b><span>companies after deduplication (31,706 rows before)</span></div>
+    <div><b>25</b><span>industries</span></div>
+    <div><b>2,206</b><span>companies with no financial row (8.1%)</span></div>
+  </div>
+  <div class="tw"><table id="t-ratios"></table></div>
+  <p>The financial file has only five columns: <code>id</code>, <code>country_code</code> and the three ratios. There is <b>no revenue column</b>, which matters later.</p>
+  <p><b>Why <code>.groupby("id").first()</code> is safe.</b> About 160 ids appear twice. <code>first()</code> takes the first non-null value per column, so it can combine two partial rows. Daniel's run found 162 such companies: 14 exact copies, and 148 that differed only by a value versus NA. So nothing conflicts.</p>
+  <p><b>Why deduplicate first.</b> The private test set is deduplicated, so the analysis uses the same population as the final evaluation.</p>
+</section>
+
+<section id="problems">
+  <div class="eyebrow">Notebook sections 2 and 3</div>
+  <h2>What is wrong with the data?</h2>
+  <p>"Bad data" is several different problems, so each kind is counted separately.</p>
+  <div class="fig"><div class="tw"><table id="t-problems"></table></div></div>
+  <ul>
+    <li><b>Missing:</b> EBITDA is the real gap, at 62%.</li>
+    <li><b><code>inf</code>:</b> a division by zero, so revenue should be zero. The sign only says whether profit was positive or negative. <code>-inf</code> is ten times more common than <code>+inf</code> for net margin, so most of these companies have no revenue and make a loss.</li>
+    <li><b>Negative margins are normal:</b> 7,521 companies simply lose money.</li>
+    <li><b>Negative asset turnover is unusual:</b> the notebook calls these 117 values data errors, but the check further down suggests most are real negative revenue.</li>
+    <li><b>The median looks normal, the min and max do not.</b> That already shows that extreme values exist.</li>
+  </ul>
+  <h3>Does <code>inf</code> really mean zero revenue?</h3>
+  <p>This is a test of the idea. If revenue is 0, then <code>asset_turnover = revenue / assets</code> must also be 0.</p>
+  <div class="fig">
+    <div class="xt">
+      <div></div><div class="h">Asset turnover not 0</div><div class="h">Asset turnover 0</div>
+      <div class="h">Net margin not <code>inf</code></div><div class="c">25,123</div><div class="c">3</div>
+      <div class="h">Net margin <code>inf</code></div><div class="c">64</div><div class="c on">1,938</div>
+    </div>
+  </div>
+  <div class="finding"><strong>Result: the idea holds.</strong> Of 2,002 <code>inf</code> margins, 1,938 (96.8%) have asset turnover of exactly 0. Going the other way, 1,938 of 1,941 zero turnovers have an <code>inf</code> margin. The saved outputs do not show what the 64 exceptions are. Asset turnover being missing would be one explanation, since missing also counts as "not 0".</div>
+  <h3>Are the 117 negative turnovers just flipped signs?</h3>
+  <p>This check is not in the notebook. If a minus sign were a typo in this one column, two things should hold: the size of the value should look normal for its industry, and the company's margins should look like everyone else's. A negative turnover needs negative revenue or negative assets. Negative revenue would also flip the sign of a loss-making company's margin, so a loss would appear as a positive margin.</p>
+  <div class="fig"><div class="tw"><table id="t-neg"></table></div></div>
+  <div class="finding"><strong>Result: they are not simple sign typos.</strong> Their size does not match their industries (p = 0.000002 against a typo), with 33% in the lowest tenth. Their margins are also very unusual: 97% are positive, with a median of 1.235. This pattern fits negative revenue together with a loss. 65% are in Financial Services, where investment losses booked as revenue would be one explanation (<span class="hyp">hypothesis</span>). Taking the absolute value would be wrong, so keeping them as missing is still the right rule. The ratios alone cannot prove this, because there is no revenue column.</div>
+  <h3>Cleaning rules</h3>
+  <div class="tw"><table id="t-rules"></table></div>
+  <p>The flag uses <b>OR</b>. A company with zero revenue and zero profit gives <code>0/0 = NaN</code>, not <code>inf</code>, so the margin alone would miss it. Asset turnover of 0 still catches it. In total <b>2,005 companies</b> are flagged (1,938 + 64 + 3 from the table above).</p>
+  <div class="tw"><table id="t-nan"></table></div>
+</section>
+
+<section id="missing">
+  <div class="eyebrow">Notebook section 4</div>
+  <h2>Is the missing data random?</h2>
+  <p>If values were missing at random, filling them would be harmless. If missingness depends on the industry, then being missing is itself a signal.</p>
+  <ul>
+    <li><b>Chi-square test of independence.</b> Build a table of industry × flag. Compute how many flagged companies each industry would have if the flag had nothing to do with industry, and add up how far reality is from that.</li>
+    <li><b>Cramér's V.</b> With 27,000 rows, tiny differences get tiny p-values, so <code>p</code> only shows that an effect exists. V rescales chi-square to 0-1, where 0.1 is small, 0.3 medium and 0.5 large.</li>
+  </ul>
+  <div class="fig">
+    <h4>Cramér's V: how strongly each flag depends on industry</h4>
+    <div class="plot" id="c-v"></div>
+  </div>
+  <div class="finding"><strong>Result: missingness is not random.</strong> All three p-values show as <code>0.0e+00</code>, which is a display effect, so report them as <code>p &lt; 0.001</code>. The useful finding is the ranking in V: whether a company has a financial row barely depends on industry (chi² 187), EBITDA missing does more (1,378), and zero revenue depends on it strongly (2,855).</div>
+  <div class="fig">
+    <h4>Figure 1. Share of companies in each industry with each data problem</h4>
+    <div class="sub">If missingness were random, each column would be one flat colour. Colour changes within a column are the finding.</div>
+    <div class="controls" id="heat-sort" role="group" aria-label="Sort industries by"></div>
+    <div class="heat" id="c-heat"></div>
+    <div class="legend"><span>0%</span><div class="scale"></div><span>100%</span></div>
+    <details><summary>Show as a table</summary><div class="tw"><table id="t-heat"></table></div></details>
+  </div>
+  <ul>
+    <li><b>No financial row:</b> almost flat, 4% to 12%. This matches V = 0.083.</li>
+    <li><b>EBITDA missing:</b> a clear gradient, from 33% (REITs) to 75% (Semiconductors). Next highest are Materials 72%, Technology Hardware 70% and Banks 68%.</li>
+    <li><b>Zero revenue:</b> nearly empty, with four exceptions: Materials 24%, Pharma and Biotech 20%, Financial Services 13% and Energy 8%. Everything else is 5% or below.</li>
+  </ul>
+  <p><b>Does it make business sense?</b> <span class="hyp">Hypothesis:</span> zero revenue fits mining explorers (Materials), pre-revenue biotechs (Pharma) and oil and gas explorers (Energy), and shell or investment companies could explain Financial Services. <span class="hyp">Hypothesis:</span> banks at 68% fits, since EBITDA is not a meaningful number for a bank.</p>
+  <p><b>What does not fit that story:</b> Insurance is at only 41%, and Semiconductors and Technology Hardware are the highest with almost no zero-revenue companies. This may reflect how the data was collected, but this notebook cannot show that.</p>
+  <h3>Which way of filling gaps is best?</h3>
+  <p>A model needs a number in every cell, so the notebook rules out options first.</p>
+  <div class="tw"><table id="t-fill"></table></div>
+  <p>The experiment hides a random 20% of known values, learns both medians on the other 80% (countries with fewer than 10 values use the global median, as in Daniel's notebook), fills the hidden values, and measures the mean absolute error in signed-log units. Lower is better.</p>
+  <div class="fig"><div class="tw"><table id="t-impute"></table></div></div>
+  <div class="finding"><strong>Result:</strong> the country median always wins, but on margins by less than 1%. Only asset turnover gains visibly. Both errors stay large, so neither rule recovers the real value well. This is why the simple global median is defensible, and it is what <code>ExtraFeatures</code> in notebook 02 uses. Country reaches the model through its own one-hot columns anyway.</div>
+  <p><b>The missing flag.</b> Filling gives thousands of companies the identical invented value, which looks more certain than it is. The flag tells the model the number was invented. The flag columns are built in <code>ExtraFeatures</code>, not in this notebook.</p>
+</section>
+
+<section id="outliers">
+  <div class="eyebrow">Notebook section 5</div>
+  <h2>How bad are the outliers?</h2>
+  <div class="fig"><div class="tw"><table id="t-outliers"></table></div></div>
+  <ul>
+    <li><b>Compare mean and median.</b> A typical net margin is 3.8%, but the mean says 180,000%. The mean is useless here.</li>
+    <li><b>Tukey fence:</b> <code>Q1 - 3 × IQR</code> to <code>Q3 + 3 × IQR</code>. IQR is the width of the middle 50%.</li>
+    <li><b>Why not mean ± 3 std?</b> Here that would mean a fence of about ±716,000 on net margin, so almost nothing would count as an outlier. The outliers would hide themselves. Quartiles barely move, whatever the extremes do.</li>
+    <li><b>15% is far more than a few bad rows.</b> Deleting everything beyond the fence would lose about one in seven companies with a net margin. The distribution is heavy-tailed, and that is a strong argument against deleting.</li>
+  </ul>
+  <h3>Are the extremes errors or real?</h3>
+  <p>Revenue is at the bottom of a margin but at the top of asset turnover. So if tiny revenue causes the giant margin, asset turnover should be close to 0 in the same row.</p>
+  <div class="fig"><h4>The 5 highest and 5 lowest net margins</h4><div class="tw"><table id="t-extreme"></table></div></div>
+  <div class="finding"><strong>Result:</strong> 9 of 10 have asset turnover within 0.0011 of zero, which supports "tiny revenue, ratio blows up". One is low but less extreme. The notebook shows <code>NaN</code> for the two largest, because their turnover is a tiny negative number and cleaning removed it. The industries also fit the zero-revenue list. So "real but unhelpful" is the best reading, not a proof.</div>
+  <h3>The treatment: shrink, do not delete</h3>
+  <ol>
+    <li><b>Signed log:</b> <code>sign(v) * log(1 + |v|)</code>. A plain log fails on negative margins and on 0. Normal values barely change, giant values collapse, and the order stays the same.</li>
+    <li><b>Clipping</b> at the 1st and 99th percentiles. Values beyond the limits are set to the limit, and the company stays in the data.</li>
+  </ol>
+  <div class="fig">
+    <h4>Try it on a net margin</h4>
+    <div class="calc">
+      <label for="calc-in">Original value<input id="calc-in" type="number" value="35076960" step="any"></label>
+      <div><div style="font-size:14px;color:var(--ink-2)">Signed log</div><output id="calc-log"></output></div>
+      <div><div style="font-size:14px;color:var(--ink-2)">After clipping</div><output id="calc-clip"></output></div>
+    </div>
+    <div class="controls" id="calc-presets" role="group" aria-label="Example values"></div>
+    <div class="sub" id="calc-note"></div>
+  </div>
+  <p>In original units, the clip limits are about <b>-149 to 2.2</b> for net margin, <b>-377 to 2.5</b> for EBITDA margin, and <b>0 to 3.9</b> for asset turnover.</p>
+  <div class="fig">
+    <h4>Figure 2, top row. Net margin in original units</h4>
+    <div class="sub">The y-axis is logarithmic, otherwise the lone companies would be invisible. They stretch the x-axis to 35 million, so everyone else lands in a single bin and no shape is visible. The other two ratios look the same.</div>
+    <div class="hc" id="c-before"></div>
+  </div>
+  <div class="fig">
+    <h4>Figure 2, bottom row. After signed log and clipping</h4>
+    <div class="controls" id="hist-tabs" role="group" aria-label="Choose ratio"></div>
+    <div class="legend" id="hist-legend"></div>
+    <div class="hc" id="c-hist"></div>
+    <div class="sub" id="hist-note"></div>
+  </div>
+  <div class="tw"><table id="t-scaled"></table></div>
+  <div class="finding"><strong>Result:</strong> std falls from 238,733 to 0.86 on net margin. The means are now in the same range as the medians. They are still not equal, because the left tail keeps the margin means below the medians. That is a real feature of the data, and the transformation was not meant to make it symmetric.</div>
+</section>
+
+<section id="industries">
+  <div class="eyebrow">Notebook section 6</div>
+  <h2>Do financial distributions differ between industries?</h2>
+  <p>This section uses medians because they are stable, and <code>_clean</code> values because filled-in medians would fake similarity.</p>
+  <div class="fig">
+    <h4>Figures 3 to 5. Each ratio by industry</h4>
+    <div class="sub">Dot is the median, line is the middle 50% of companies, darker vertical line is the median of all companies. Click two industries to compare them. Overlapping lines mean a company's value does not tell you which of the two it belongs to, even if the medians differ.</div>
+    <div class="controls" id="range-tabs" role="group" aria-label="Choose ratio"></div>
+    <div class="readout" id="range-read" aria-live="polite"></div>
+    <div class="plot" id="c-range"></div>
+    <details><summary>Show as a table</summary><div class="tw"><table id="t-range"></table></div></details>
+  </div>
+  <div class="sub" id="range-axis-note" style="font-size:15px;color:var(--ink-2)"></div>
+  <ul id="range-notes"></ul>
+  <p>The smallest industries are Consumer Staples Retail (178 companies) and Household Products (226), so their medians are the least reliable. The largest are Materials (3,917) and Capital Goods (3,125).</p>
+  <h3>Is the difference statistically significant?</h3>
+  <ul>
+    <li><b>Kruskal-Wallis test.</b> Could all 25 industries come from the same distribution? Rank all companies from lowest to highest, ignoring industry. If industry did not matter, every industry would have about the same average rank. <code>H</code> grows the more those average ranks differ.</li>
+    <li><b>Why not ANOVA?</b> ANOVA compares means and assumes roughly normal data, and neither is true here. Ranks do not care if the largest value is 10 or 35 million.</li>
+    <li><b>Effect size guide:</b> 0.01 small, 0.06 medium, 0.14 large.</li>
+  </ul>
+  <div class="fig">
+    <h4>Effect size: how much of the rank variation industry explains</h4>
+    <div class="plot" id="c-eff"></div>
+    <div class="tw"><table id="t-kw"></table></div>
+  </div>
+  <div class="finding"><strong>Result: asset turnover separates industries best.</strong> All three ratios differ by industry, with p-values too small to display (report <code>p &lt; 0.001</code>). Industry explains about 25% of the variation in asset turnover ranks. That makes sense, because asset turnover describes the business model, while margins also depend on how a company is doing right now (<span class="hyp">hypothesis</span>).</div>
+</section>
+
+<section id="classifier">
+  <div class="eyebrow">Notebook section 6, then notebook 02</div>
+  <h2>Can financials separate the pairs the classifier confuses?</h2>
+  <p>Kruskal-Wallis only says that some industries differ. For classification, what matters is whether the ones we mix up differ. Each of 11 pairs is tested on each ratio, which gives 33 tests.</p>
+  <ul>
+    <li><b>Mann-Whitney U</b> is the two-group version of Kruskal-Wallis.</li>
+    <li><b>Bonferroni correction:</b> with 33 tests, some would look significant by luck, so each <code>p</code> is multiplied by 33.</li>
+    <li><b>AUC = U / (n1 × n2):</b> the probability that a random company from the first industry has a higher value than one from the second. 0.5 means no separation. 0.30 is as strong as 0.70, just in the other direction.</li>
+  </ul>
+  <p><b>21 of 33 comparisons are significant after correction.</b> Significant does not mean useful, so the chart shows how far each AUC is from 0.5.</p>
+  <div class="fig">
+    <h4>Distance of each AUC from 0.5, per confused pair</h4>
+    <div class="legend"><span><i class="m0"></i>Net margin</span><span><i class="m1"></i>EBITDA margin</span><span><i class="m2"></i>Asset turnover</span></div>
+    <div class="plot" id="c-auc"></div>
+    <details open><summary>Hide the table</summary><div class="tw"><table id="t-auc"></table></div></details>
+  </div>
+  <p>The strongest result: a random Software company has a higher asset turnover than a random Financial Services company 81% of the time (medians 0.613 versus 0.091). The notebook's second table lists the 10 strongest cases. All have p-values far below 0.05 after correction, and their directions make sense. For example, Materials has lower turnover than Capital Goods (0.401 versus 0.612).</p>
+  <h3>Compare with notebook 02</h3>
+  <div class="fig">
+    <h4>Ensemble score on one 90/10 split, with the ±0.01 noise of a single split</h4>
+    <div class="sub">The axis is zoomed in and does not start at 0.</div>
+    <div class="plot" id="c-ens"></div>
+  </div>
+  <div class="finding"><strong>Result:</strong> financials change the score by -0.0005, far inside the noise of one split, so they added nothing measurable. Country added about +0.01. This fits the AUC chart: financials separate one confused pair well, and most others weakly or not at all. The embedding also already describes what a company does, so it may hold most of what the ratios reveal about the industry (<span class="hyp">hypothesis</span>). The full 5-fold run has not been done, so this comparison is not final.</div>
+</section>
+
+<section id="daniel">
+  <div class="eyebrow">Compared with financial_data.ipynb</div>
+  <h2>What changed from Daniel's notebook</h2>
+  <div class="tw"><table id="t-daniel"></table></div>
+  <p><b>Keep the tone fair.</b> Daniel's leakage reasoning is correct and is used here, and the country median did win the test. The main change is that a median makes one of the 2,005 zero-revenue companies look average.</p>
+  <p><b>Worth raising with Daniel.</b> In the saved run, the deduplication cell failed with a <code>ValueError</code> before reaching the <code>groupby("id").first()</code> line. <code>df_train</code> grows from 24,411 to 24,546 rows after the merge, so the 135 extra rows suggest the duplicate ids were not collapsed in that run.</p>
+</section>
+
+<section id="limits">
+  <div class="eyebrow">Know these before you present</div>
+  <h2>Weak spots</h2>
+  <ol id="limits-list"></ol>
+</section>
+
+<section id="questions">
+  <h2>Questions Daniel might ask</h2>
+  <div class="qa" id="qa"></div>
+</section>
+
+<section id="outputs">
+  <h2>Every output at a glance</h2>
+  <div class="tw"><table id="t-outputs"></table></div>
+</section>
+
+<section id="conclusions">
+  <div class="eyebrow">Notebook section 7</div>
+  <h2>What the results say</h2>
+  <p>This cell is still empty in your notebook. These are the readings, for you to put in your own words.</p>
+  <ol id="concl"></ol>
+</section>
+</main>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+const D = {"overall_median": {"net_profit_margin": 0.038, "ebitda_margin": 0.1027, "asset_turnover": 0.4648}, "ranges": {"net_profit_margin": {"Automobiles & Components": {"q1": 0.0005, "median": 0.0333, "q3": 0.0755, "n": 573.0}, "Banks": {"q1": 0.1518, "median": 0.2463, "q3": 0.3384, "n": 877.0}, "Capital Goods": {"q1": -0.0155, "median": 0.0382, "q3": 0.0934, "n": 2832.0}, "Commercial & Professional Services": {"q1": -0.0401, "median": 0.0345, "q3": 0.1017, "n": 638.0}, "Consumer Discretionary Distribution & Retail": {"q1": -0.0229, "median": 0.0192, "q3": 0.0628, "n": 564.0}, "Consumer Durables & Apparel": {"q1": -0.0323, "median": 0.0332, "q3": 0.0856, "n": 1038.0}, "Consumer Services": {"q1": -0.0791, "median": 0.0318, "q3": 0.1119, "n": 578.0}, "Consumer Staples Distribution & Retail": {"q1": -0.0, "median": 0.0218, "q3": 0.0386, "n": 162.0}, "Energy": {"q1": -0.1593, "median": 0.04, "q3": 0.1442, "n": 979.0}, "Equity Real Estate Investment Trusts (REITs)": {"q1": -0.0158, "median": 0.251, "q3": 0.5666, "n": 393.0}, "Financial Services": {"q1": 0.024, "median": 0.258, "q3": 0.7976, "n": 1365.0}, "Food, Beverage & Tobacco": {"q1": -0.0027, "median": 0.0392, "q3": 0.0968, "n": 943.0}, "Health Care Equipment & Services": {"q1": -0.5168, "median": -0.0028, "q3": 0.0913, "n": 844.0}, "Household & Personal Products": {"q1": -0.0509, "median": 0.0338, "q3": 0.099, "n": 193.0}, "Insurance": {"q1": 0.0263, "median": 0.079, "q3": 0.1483, "n": 257.0}, "Materials": {"q1": -0.0794, "median": 0.0246, "q3": 0.0816, "n": 2471.0}, "Media & Entertainment": {"q1": -0.2889, "median": -0.0137, "q3": 0.0918, "n": 755.0}, "Pharmaceuticals, Biotechnology & Life Sciences": {"q1": -2.9433, "median": -0.1849, "q3": 0.0888, "n": 1329.0}, "Real Estate Management & Development": {"q1": -0.1099, "median": 0.0752, "q3": 0.2643, "n": 783.0}, "Semiconductors & Semiconductor Equipment": {"q1": -0.1102, "median": 0.044, "q3": 0.1404, "n": 561.0}, "Software & Services": {"q1": -0.3634, "median": -0.0019, "q3": 0.0837, "n": 1287.0}, "Technology Hardware & Equipment": {"q1": -0.0881, "median": 0.0261, "q3": 0.0838, "n": 1431.0}, "Telecommunication Services": {"q1": -0.0691, "median": 0.0365, "q3": 0.1211, "n": 197.0}, "Transportation": {"q1": 0.011, "median": 0.0706, "q3": 0.1819, "n": 532.0}, "Utilities": {"q1": 0.0198, "median": 0.0832, "q3": 0.1638, "n": 506.0}}, "ebitda_margin": {"Automobiles & Components": {"q1": -0.0377, "median": 0.0918, "q3": 0.1523, "n": 172.0}, "Banks": {"q1": 0.0849, "median": 0.2493, "q3": 0.3736, "n": 248.0}, "Capital Goods": {"q1": 0.031, "median": 0.1054, "q3": 0.1708, "n": 929.0}, "Commercial & Professional Services": {"q1": 0.0195, "median": 0.0978, "q3": 0.1786, "n": 353.0}, "Consumer Discretionary Distribution & Retail": {"q1": 0.0191, "median": 0.0744, "q3": 0.146, "n": 330.0}, "Consumer Durables & Apparel": {"q1": 0.002, "median": 0.0896, "q3": 0.1728, "n": 353.0}, "Consumer Services": {"q1": 0.0397, "median": 0.1472, "q3": 0.2813, "n": 333.0}, "Consumer Staples Distribution & Retail": {"q1": -0.0324, "median": 0.0503, "q3": 0.0776, "n": 78.0}, "Energy": {"q1": -0.0102, "median": 0.1554, "q3": 0.438, "n": 428.0}, "Equity Real Estate Investment Trusts (REITs)": {"q1": 0.3477, "median": 0.5697, "q3": 0.7676, "n": 267.0}, "Financial Services": {"q1": 0.0505, "median": 0.3471, "q3": 0.8791, "n": 776.0}, "Food, Beverage & Tobacco": {"q1": -0.0088, "median": 0.0909, "q3": 0.1696, "n": 366.0}, "Health Care Equipment & Services": {"q1": -0.7375, "median": -0.0137, "q3": 0.1616, "n": 509.0}, "Household & Personal Products": {"q1": -0.1012, "median": 0.1033, "q3": 0.1838, "n": 90.0}, "Insurance": {"q1": 0.0692, "median": 0.1298, "q3": 0.256, "n": 149.0}, "Materials": {"q1": -2.3526, "median": 0.0768, "q3": 0.1737, "n": 852.0}, "Media & Entertainment": {"q1": -0.2242, "median": 0.0476, "q3": 0.2036, "n": 390.0}, "Pharmaceuticals, Biotechnology & Life Sciences": {"q1": -7.2953, "median": -1.0279, "q3": 0.0866, "n": 708.0}, "Real Estate Management & Development": {"q1": 0.0218, "median": 0.2204, "q3": 0.5771, "n": 317.0}, "Semiconductors & Semiconductor Equipment": {"q1": -0.3152, "median": 0.0651, "q3": 0.2172, "n": 124.0}, "Software & Services": {"q1": -0.4979, "median": 0.0164, "q3": 0.1686, "n": 683.0}, "Technology Hardware & Equipment": {"q1": -0.1917, "median": 0.049, "q3": 0.1443, "n": 387.0}, "Telecommunication Services": {"q1": 0.068, "median": 0.2925, "q3": 0.3952, "n": 113.0}, "Transportation": {"q1": 0.0898, "median": 0.2016, "q3": 0.3946, "n": 229.0}, "Utilities": {"q1": 0.1406, "median": 0.3006, "q3": 0.44, "n": 236.0}}, "asset_turnover": {"Automobiles & Components": {"q1": 0.533, "median": 0.7906, "q3": 1.1074, "n": 579.0}, "Banks": {"q1": 0.0277, "median": 0.037, "q3": 0.0486, "n": 870.0}, "Capital Goods": {"q1": 0.3846, "median": 0.6123, "q3": 0.9263, "n": 2867.0}, "Commercial & Professional Services": {"q1": 0.3083, "median": 0.6976, "q3": 1.2106, "n": 649.0}, "Consumer Discretionary Distribution & Retail": {"q1": 0.5829, "median": 1.0765, "q3": 1.5743, "n": 566.0}, "Consumer Durables & Apparel": {"q1": 0.4568, "median": 0.7494, "q3": 1.0968, "n": 1038.0}, "Consumer Services": {"q1": 0.2804, "median": 0.5507, "q3": 0.9695, "n": 587.0}, "Consumer Staples Distribution & Retail": {"q1": 1.0402, "median": 1.6902, "q3": 2.2781, "n": 166.0}, "Energy": {"q1": 0.164, "median": 0.3816, "q3": 0.7974, "n": 1079.0}, "Equity Real Estate Investment Trusts (REITs)": {"q1": 0.0605, "median": 0.0834, "q3": 0.1264, "n": 389.0}, "Financial Services": {"q1": 0.0243, "median": 0.0909, "q3": 0.2387, "n": 1491.0}, "Food, Beverage & Tobacco": {"q1": 0.4677, "median": 0.7952, "q3": 1.224, "n": 952.0}, "Health Care Equipment & Services": {"q1": 0.3004, "median": 0.5419, "q3": 0.8947, "n": 882.0}, "Household & Personal Products": {"q1": 0.5233, "median": 0.7917, "q3": 1.1343, "n": 194.0}, "Insurance": {"q1": 0.1247, "median": 0.2387, "q3": 0.4106, "n": 256.0}, "Materials": {"q1": 0.0, "median": 0.4006, "q3": 0.7825, "n": 3377.0}, "Media & Entertainment": {"q1": 0.2984, "median": 0.5671, "q3": 0.9304, "n": 762.0}, "Pharmaceuticals, Biotechnology & Life Sciences": {"q1": 0.0042, "median": 0.2414, "q3": 0.5601, "n": 1686.0}, "Real Estate Management & Development": {"q1": 0.0647, "median": 0.1301, "q3": 0.2669, "n": 783.0}, "Semiconductors & Semiconductor Equipment": {"q1": 0.2986, "median": 0.4908, "q3": 0.7142, "n": 568.0}, "Software & Services": {"q1": 0.3304, "median": 0.613, "q3": 1.0514, "n": 1308.0}, "Technology Hardware & Equipment": {"q1": 0.3978, "median": 0.6305, "q3": 0.9455, "n": 1441.0}, "Telecommunication Services": {"q1": 0.2938, "median": 0.4629, "q3": 0.6748, "n": 205.0}, "Transportation": {"q1": 0.2641, "median": 0.499, "q3": 0.9157, "n": 537.0}, "Utilities": {"q1": 0.1515, "median": 0.2691, "q3": 0.5012, "n": 515.0}}}, "hist": {"net_profit_margin": {"counts": [233, 10, 18, 10, 11, 10, 20, 20, 22, 15, 17, 20, 27, 15, 32, 31, 19, 43, 31, 34, 38, 40, 38, 33, 38, 39, 47, 36, 61, 48, 48, 42, 60, 68, 90, 65, 97, 100, 104, 143, 145, 166, 229, 276, 351, 489, 719, 1301, 4455, 6970, 2528, 1068, 459, 220, 207, 257, 66, 40, 32, 237], "edges": [-5.0101, -4.9073, -4.8045, -4.7017, -4.5989, -4.4961, -4.3933, -4.2905, -4.1877, -4.0849, -3.9822, -3.8794, -3.7766, -3.6738, -3.571, -3.4682, -3.3654, -3.2626, -3.1598, -3.057, -2.9543, -2.8515, -2.7487, -2.6459, -2.5431, -2.4403, -2.3375, -2.2347, -2.1319, -2.0291, -1.9263, -1.8236, -1.7208, -1.618, -1.5152, -1.4124, -1.3096, -1.2068, -1.104, -1.0012, -0.8984, -0.7956, -0.6929, -0.5901, -0.4873, -0.3845, -0.2817, -0.1789, -0.0761, 0.0267, 0.1295, 0.2323, 0.335, 0.4378, 0.5406, 0.6434, 0.7462, 0.849, 0.9518, 1.0546, 1.1574], "low": -5.01, "high": 1.157, "clipped_low": 221, "clipped_high": 221}, "ebitda_margin": {"counts": [97, 12, 6, 8, 11, 10, 7, 9, 12, 10, 15, 7, 9, 17, 21, 13, 11, 17, 14, 18, 16, 20, 27, 24, 29, 35, 23, 27, 27, 33, 42, 35, 42, 43, 44, 33, 45, 68, 50, 60, 79, 84, 96, 108, 140, 136, 169, 246, 435, 1276, 2602, 1426, 614, 363, 240, 168, 49, 23, 16, 103], "edges": [-5.9359, -5.8161, -5.6962, -5.5764, -5.4565, -5.3367, -5.2168, -5.097, -4.9771, -4.8573, -4.7374, -4.6176, -4.4977, -4.3779, -4.258, -4.1382, -4.0183, -3.8985, -3.7786, -3.6588, -3.5389, -3.4191, -3.2992, -3.1794, -3.0595, -2.9397, -2.8198, -2.7, -2.5801, -2.4603, -2.3404, -2.2206, -2.1007, -1.9809, -1.861, -1.7412, -1.6213, -1.5015, -1.3816, -1.2618, -1.1419, -1.0221, -0.9022, -0.7824, -0.6625, -0.5427, -0.4228, -0.303, -0.1831, -0.0633, 0.0566, 0.1764, 0.2962, 0.4161, 0.5359, 0.6558, 0.7756, 0.8955, 1.0153, 1.1352, 1.255], "low": -5.936, "high": 1.255, "clipped_low": 95, "clipped_high": 95}, "asset_turnover": {"counts": [3037, 1142, 764, 635, 567, 514, 530, 554, 556, 601, 631, 656, 727, 687, 740, 676, 741, 684, 687, 651, 652, 643, 585, 557, 508, 481, 449, 407, 353, 329, 289, 269, 226, 210, 194, 170, 140, 151, 103, 122, 96, 84, 67, 84, 70, 62, 52, 41, 45, 36, 35, 32, 30, 31, 23, 29, 22, 23, 16, 251], "edges": [0.0, 0.0265, 0.0531, 0.0796, 0.1061, 0.1327, 0.1592, 0.1857, 0.2123, 0.2388, 0.2653, 0.2919, 0.3184, 0.3449, 0.3714, 0.398, 0.4245, 0.451, 0.4776, 0.5041, 0.5306, 0.5572, 0.5837, 0.6102, 0.6368, 0.6633, 0.6898, 0.7164, 0.7429, 0.7694, 0.796, 0.8225, 0.849, 0.8756, 0.9021, 0.9286, 0.9552, 0.9817, 1.0082, 1.0348, 1.0613, 1.0878, 1.1143, 1.1409, 1.1674, 1.1939, 1.2205, 1.247, 1.2735, 1.3001, 1.3266, 1.3531, 1.3797, 1.4062, 1.4327, 1.4593, 1.4858, 1.5123, 1.5389, 1.5654, 1.5919], "low": 0.0, "high": 1.592, "clipped_low": 1941, "clipped_high": 238}}, "counts": {"Materials": 3917, "Capital Goods": 3125, "Pharmaceuticals, Biotechnology & Life Sciences": 1922, "Financial Services": 1884, "Technology Hardware & Equipment": 1544, "Software & Services": 1536, "Energy": 1316, "Consumer Durables & Apparel": 1163, "Food, Beverage & Tobacco": 1094, "Health Care Equipment & Services": 1014, "Banks": 947, "Media & Entertainment": 912, "Real Estate Management & Development": 898, "Commercial & Professional Services": 801, "Consumer Services": 672, "Consumer Discretionary Distribution & Retail": 658, "Automobiles & Components": 625, "Semiconductors & Semiconductor Equipment": 607, "Transportation": 583, "Utilities": 569, "Equity Real Estate Investment Trusts (REITs)": 422, "Insurance": 287, "Telecommunication Services": 228, "Household & Personal Products": 226, "Consumer Staples Distribution & Retail": 178}, "shares": {"none": {"Automobiles & Components": 6.1, "Banks": 5.8, "Capital Goods": 6.4, "Commercial & Professional Services": 12.1, "Consumer Discretionary Distribution & Retail": 9.3, "Consumer Durables & Apparel": 8.3, "Consumer Services": 9.8, "Consumer Staples Distribution & Retail": 3.9, "Energy": 10.8, "Equity Real Estate Investment Trusts (REITs)": 4.0, "Financial Services": 11.3, "Food, Beverage & Tobacco": 10.5, "Health Care Equipment & Services": 9.5, "Household & Personal Products": 7.5, "Insurance": 7.3, "Materials": 6.4, "Media & Entertainment": 11.7, "Pharmaceuticals, Biotechnology & Life Sciences": 8.3, "Real Estate Management & Development": 9.6, "Semiconductors & Semiconductor Equipment": 4.4, "Software & Services": 10.4, "Technology Hardware & Equipment": 4.7, "Telecommunication Services": 7.9, "Transportation": 6.7, "Utilities": 7.6}, "ebitda": {"Automobiles & Components": 66.4, "Banks": 68.0, "Capital Goods": 63.8, "Commercial & Professional Services": 43.8, "Consumer Discretionary Distribution & Retail": 40.6, "Consumer Durables & Apparel": 61.3, "Consumer Services": 40.6, "Consumer Staples Distribution & Retail": 52.2, "Energy": 56.7, "Equity Real Estate Investment Trusts (REITs)": 32.7, "Financial Services": 47.5, "Food, Beverage & Tobacco": 56.0, "Health Care Equipment & Services": 40.3, "Household & Personal Products": 52.7, "Insurance": 40.8, "Materials": 71.8, "Media & Entertainment": 45.5, "Pharmaceuticals, Biotechnology & Life Sciences": 54.9, "Real Estate Management & Development": 55.1, "Semiconductors & Semiconductor Equipment": 75.1, "Software & Services": 45.1, "Technology Hardware & Equipment": 70.2, "Telecommunication Services": 42.5, "Transportation": 54.0, "Utilities": 51.0}, "zero": {"Automobiles & Components": 1.8, "Banks": 0.4, "Capital Goods": 1.8, "Commercial & Professional Services": 3.0, "Consumer Discretionary Distribution & Retail": 1.2, "Consumer Durables & Apparel": 0.7, "Consumer Services": 2.5, "Consumer Staples Distribution & Retail": 2.8, "Energy": 8.4, "Equity Real Estate Investment Trusts (REITs)": 1.2, "Financial Services": 12.5, "Food, Beverage & Tobacco": 1.5, "Health Care Equipment & Services": 4.9, "Household & Personal Products": 1.8, "Insurance": 0.7, "Materials": 23.7, "Media & Entertainment": 2.4, "Pharmaceuticals, Biotechnology & Life Sciences": 19.8, "Real Estate Management & Development": 1.3, "Semiconductors & Semiconductor Equipment": 1.6, "Software & Services": 3.1, "Technology Hardware & Equipment": 1.2, "Telecommunication Services": 3.9, "Transportation": 1.2, "Utilities": 2.5}}};
+const R = ["net_profit_margin", "ebitda_margin", "asset_turnover"];
+const RN = { net_profit_margin: "Net margin", ebitda_margin: "EBITDA margin", asset_turnover: "Asset turnover" };
+const SHORT = {
+  "Equity Real Estate Investment Trusts (REITs)": "REITs",
+  "Pharmaceuticals, Biotechnology & Life Sciences": "Pharma & Biotech",
+  "Consumer Discretionary Distribution & Retail": "Consumer Discretionary Retail",
+  "Consumer Staples Distribution & Retail": "Consumer Staples Retail",
+  "Semiconductors & Semiconductor Equipment": "Semiconductors",
+  "Technology Hardware & Equipment": "Technology Hardware",
+  "Health Care Equipment & Services": "Health Care",
+  "Commercial & Professional Services": "Commercial Services",
+  "Real Estate Management & Development": "Real Estate",
+  "Telecommunication Services": "Telecom",
+  "Consumer Durables & Apparel": "Durables & Apparel",
+  "Household & Personal Products": "Household Products",
+  "Food, Beverage & Tobacco": "Food, Beverage & Tobacco",
+  "Automobiles & Components": "Automobiles"
+};
+const sn = n => SHORT[n] || n;
+const $ = id => document.getElementById(id);
+const fmt = (x, d = 3) => Number(x).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+const pct = (x, a, b) => 100 * (x - a) / (b - a);
+
+function tbl(id, head, rows, numeric = []) {
+  const n = i => numeric.includes(i) ? ' class="n"' : "";
+  $(id).innerHTML = "<thead><tr>" + head.map((h, i) => `<th${n(i)}>${h}</th>`).join("") + "</tr></thead><tbody>" +
+    rows.map(r => "<tr>" + r.map((c, i) => `<td${n(i)}>${c}</td>`).join("") + "</tr>").join("") + "</tbody>";
+}
+function tabs(id, items, active, onPick) {
+  const el = $(id);
+  el.innerHTML = items.map(([k, l]) => `<button type="button" data-k="${k}" aria-pressed="${k === active}">${l}</button>`).join("");
+  el.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    el.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    onPick(b.dataset.k);
+  });
+}
+function gridAxis(ticks, pos, refs = []) {
+  return `<div class="gridlay">${ticks.map(t => `<i style="left:${pos(t.v)}%"></i>`).join("")}${refs.map(v => `<i class="ref" style="left:${pos(v)}%"></i>`).join("")}</div>`;
+}
+function axisRow(ticks, pos) {
+  return `<div class="axis">${ticks.map(t => `<span style="left:${pos(t.v)}%">${t.l}</span>`).join("")}</div>`;
+}
+
+/* static tables */
+tbl("t-ratios", ["Ratio", "Formula", "Plain meaning"], [
+  ["<code>net_profit_margin</code>", "net profit / revenue", "How much of each franc of sales is left as profit after everything"],
+  ["<code>ebitda_margin</code>", "EBITDA / revenue", "Same idea, before interest, tax, depreciation and amortization, so closer to operating profitability"],
+  ["<code>asset_turnover</code>", "revenue / assets", "How much revenue the company makes from its assets"]]);
+tbl("t-problems", ["Ratio", "Missing", "Missing %", "+inf", "-inf", "Zero", "Negative", "Min", "Median", "Max"], [
+  ["Net margin", "3,038", "11.2%", "182", "1,820", "2", "7,521", "-145,480", "0.038", "35,076,960"],
+  ["EBITDA margin", "16,895", "62.3%", "66", "747", "1", "2,978", "-2,001,935", "0.103", "35,046,810"],
+  ["Asset turnover", "3,259", "12.0%", "5", "0", "1,941", "117", "-1,789", "0.462", "1,259,940"]], [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+tbl("t-rules", ["Problem", "Rule", "Reason"], [
+  ["<code>inf</code> margin or asset turnover = 0", "<code>zero_revenue = True</code>", "Real information: this company has no sales yet"],
+  ["The <code>inf</code> value itself", "Becomes <code>NaN</code>", "There is no usable number"],
+  ["Negative or <code>inf</code> asset turnover", "Becomes <code>NaN</code>", "Negative: not comparable with normal turnover. <code>inf</code>: zero assets"],
+  ["Ordinary missing", "Stays <code>NaN</code> here", "Filling is only needed for a model, and fake values would distort section 6"]]);
+tbl("t-nan", ["Share of NaN", "Before", "After", "Why it changed"], [
+  ["Net margin", "11.2%", "18.6%", "The 2,002 <code>inf</code> values became <code>NaN</code>"],
+  ["EBITDA margin", "62.3%", "65.3%", "813 <code>inf</code> values became <code>NaN</code>"],
+  ["Asset turnover", "12.0%", "12.5%", "117 negative and 5 <code>inf</code> values became <code>NaN</code>"]], [1, 2]);
+tbl("t-neg", ["Test", "Sign typo predicts", "Negative turnovers", "All positive turnovers"], [
+  ["Median size of turnover", "About 0.517", "0.073", "0.517"],
+  ["Share in lowest tenth of own industry", "10%", "33%", "10%"],
+  ["Share with positive net margin", "About 66%", "96.6%", "65.9%"],
+  ["Median net margin", "About 0.04", "1.235", "0.038"],
+  ["Share with net margin beyond ±1", "About 11%", "88.9%", "11.3%"]], [1, 2, 3]);
+tbl("t-fill", ["Option", "Verdict"], [
+  ["Drop companies", "Impossible, every company must get a prediction"],
+  ["Drop <code>ebitda_margin</code>", "Loses the signal in who is missing"],
+  ["Industry median", "<b>Label leakage:</b> industry is what we predict, and it is unknown for test companies"],
+  ["Country or global median", "Allowed, so test which is better"]]);
+tbl("t-impute", ["Ratio", "Global median error", "Country median error", "Improvement"], [
+  ["Net margin", "0.3844", "0.3817", "0.7%"], ["EBITDA margin", "0.6095", "0.6038", "0.9%"], ["Asset turnover", "0.2870", "0.2699", "6.0%"]], [1, 2, 3]);
+tbl("t-outliers", ["Ratio", "Mean", "Std", "Median", "Lower fence", "Upper fence", "Far out"], [
+  ["Net margin", "1,805.8", "238,733", "0.038", "-0.702", "0.748", "15.3%"],
+  ["EBITDA margin", "3,323.7", "361,891", "0.103", "-1.178", "1.311", "15.6%"],
+  ["Asset turnover", "54.1", "8,176", "0.465", "-2.037", "3.022", "1.7%"]], [1, 2, 3, 4, 5, 6]);
+tbl("t-extreme", ["Rank", "Industry", "Net margin", "Asset turnover"], [
+  ["Highest", "Materials, AUS", "35,076,960", "tiny negative"], ["2nd", "Financial Services, CAN", "5,335,038", "tiny negative"],
+  ["3rd", "Media, SWE", "43,293", "0.000006"], ["4th", "Materials, AUS", "13,251", "0.000019"], ["5th", "Pharma, USA", "8,438", "0.0011"],
+  ["Lowest", "Financial Services, USA", "-145,480", "0.000052"], ["2nd", "Real Estate, USA", "-32,114", "0.0397"],
+  ["3rd", "Pharma, USA", "-31,029", "0.00013"], ["4th", "Energy, POL", "-26,811", "0.00017"], ["5th", "Consumer Services, SGP", "-23,813", "0.00051"]], [2, 3]);
+tbl("t-scaled", ["Scaled ratio", "Mean", "Std", "Median", "Min", "Max"], [
+  ["Net margin", "-0.171", "0.862", "0.037", "-5.010", "1.157"], ["EBITDA margin", "-0.243", "1.143", "0.098", "-5.936", "1.255"],
+  ["Asset turnover", "0.418", "0.342", "0.382", "0.000", "1.592"]], [1, 2, 3, 4, 5]);
+tbl("t-kw", ["Ratio", "Companies", "H", "Effect size", "Reading"], [
+  ["Asset turnover", "23,747", "6,028", "0.253", "Large"],
+  ["EBITDA margin", "9,420", "1,804", "0.190", "Large, but only on the 35% of companies with a value"],
+  ["Net margin", "22,088", "2,802", "0.126", "Medium, close to large"]], [1, 2, 3]);
+tbl("t-daniel", ["Topic", "Daniel's", "This notebook"], [
+  ["Duplicate ids", "One row per id", "The same"],
+  ["Label leakage", "Rejects the industry median", "The same"],
+  ["<code>inf</code>", "Replaced by country or global median", "Zero-revenue flag, then treated as missing"],
+  ["Negative asset turnover", "Kept (min -1788.67 after cleaning)", "Treated as missing"],
+  ["Outliers", "Not handled (max 35 million, std 226,000 after filling)", "Signed log and clipping"],
+  ["Missing flag", "None", "One per ratio, in <code>02_final_ensembles.ipynb</code>"],
+  ["Country versus global median", "Chose country", "Tested: country is better by about 1% on margins, 6% on turnover"],
+  ["Train-only statistics", "Yes", "No in this notebook, by design. Yes in <code>ExtraFeatures</code>"]]);
+tbl("t-outputs", ["Output", "Section", "Question", "Answer"], [
+  ["Problem counts", "2", "What is wrong?", "62% EBITDA missing, 2,002 <code>inf</code> net margins, 117 negative turnovers"],
+  ["<code>inf</code> versus turnover 0", "2", "Does <code>inf</code> mean zero revenue?", "Yes, in 96.8% of cases"],
+  ["Chi-square, Cramér's V", "4", "Is missingness tied to industry?", "Yes: V 0.08, 0.23, 0.32"],
+  ["<b>Figure 1, heatmap</b>", "4", "Which industries?", "Zero revenue: Materials, Pharma, Financial Services. EBITDA missing: Semiconductors, Materials, Technology Hardware"],
+  ["Imputation error", "4", "Country or global?", "Country slightly better, about 1% on margins"],
+  ["Mean, std, fences", "5", "How bad are outliers?", "15% far out on margins"],
+  ["Extreme companies", "5", "Errors or real?", "Mostly tiny revenue, 9 of 10 near zero turnover"],
+  ["<b>Figure 2, histograms</b>", "5", "Did scaling work?", "Yes, shapes are visible now"],
+  ["Scaled summary", "5", "Are the extremes tamed?", "Std 238,733 to 0.86"],
+  ["Median per industry", "6", "Typical company?", "Finance has high margins and low turnover, retail the reverse"],
+  ["<b>Figures 3-5, range plots</b>", "6", "Which industries differ?", "The ends differ, the middle overlaps"],
+  ["Kruskal-Wallis", "6", "Which ratio differs most?", "Asset turnover, 0.253"],
+  ["Pair AUCs", "6", "Confused pairs separated?", "1 of 11 clearly"]]);
+
+/* value bars */
+function bars(id, items, max, ticks, refs = []) {
+  const pos = v => pct(v, 0, max);
+  $(id).innerHTML = items.map(([l, v, tip]) => `<div class="row" tabindex="0" data-tip="${tip}"><span class="lab">${l}</span><span class="track"><span class="bar" style="width:${pos(v)}%"></span><span class="val" style="left:${pos(v)}%">${v.toFixed(3)}</span></span></div>`).join("") +
+    gridAxis(ticks, pos, refs) + axisRow(ticks, pos);
+}
+bars("c-v", [["No financial row", .083, "Chi² 187, 8.1% of companies"], ["EBITDA missing", .225, "Chi² 1,378, 57.1% of companies"], ["Zero revenue", .324, "Chi² 2,855, 7.4% of companies"]],
+  .5, [{ v: 0, l: "0" }, { v: .1, l: "0.1 small" }, { v: .3, l: "0.3 medium" }, { v: .5, l: "0.5 large" }]);
+bars("c-eff", [["Asset turnover", .253, "H 6,028 on 23,747 companies"], ["EBITDA margin", .19, "H 1,804 on 9,420 companies"], ["Net margin", .126, "H 2,802 on 22,088 companies"]],
+  .3, [{ v: 0, l: "0" }, { v: .06, l: "0.06 medium" }, { v: .14, l: "0.14 large" }, { v: .3, l: "0.3" }]);
+
+/* heatmap */
+const INDS = Object.keys(D.counts);
+function drawHeat(key) {
+  const order = [...INDS].sort((a, b) => D.shares[key][a] - D.shares[key][b]);
+  const cell = (ind, k, name) => {
+    const v = D.shares[k][ind];
+    return `<div class="cell ${v >= 50 ? "hi" : ""}" tabindex="0" style="background:color-mix(in srgb, var(--seq) ${Math.max(v, 1) * .95}%, var(--surface))" data-tip="${ind}\n${name}: ${v.toFixed(1)}%\n${D.counts[ind].toLocaleString("en-US")} companies">${Math.round(v)}%</div>`;
+  };
+  $("c-heat").innerHTML = `<div class="hrow"><span></span><div class="hhead small">No row</div><div class="hhead small">EBITDA</div><div class="hhead small">Zero rev.</div></div>` +
+    order.map(i => `<div class="hrow"><span class="lab">${sn(i)}</span>${cell(i, "none", "No financial row")}${cell(i, "ebitda", "EBITDA missing")}${cell(i, "zero", "Zero revenue")}</div>`).join("");
+}
+tabs("heat-sort", [["ebitda", "Sort by EBITDA missing"], ["zero", "Sort by zero revenue"], ["none", "Sort by no row"]], "ebitda", drawHeat);
+drawHeat("ebitda");
+tbl("t-heat", ["Industry", "Companies", "No financial row", "EBITDA missing", "Zero revenue"],
+  [...INDS].sort().map(i => [sn(i), D.counts[i].toLocaleString("en-US"), D.shares.none[i].toFixed(1) + "%", D.shares.ebitda[i].toFixed(1) + "%", D.shares.zero[i].toFixed(1) + "%"]), [1, 2, 3, 4]);
+
+/* signed log calculator */
+const LOW = -5.01, HIGH = 1.157;
+function calc() {
+  const v = parseFloat($("calc-in").value);
+  if (!isFinite(v)) { $("calc-log").textContent = "-"; $("calc-clip").textContent = "-"; $("calc-note").textContent = "Enter a number."; return; }
+  const s = Math.sign(v) * Math.log1p(Math.abs(v));
+  const c = Math.min(HIGH, Math.max(LOW, s));
+  $("calc-log").textContent = fmt(s);
+  $("calc-clip").textContent = fmt(c);
+  $("calc-note").textContent = c !== s
+    ? `Clipped to the ${s > 0 ? "99th" : "1st"} percentile limit for net margin, ${s > 0 ? "1.157" : "-5.010"}. The company stays in the data.`
+    : "Inside the limits, so clipping leaves it unchanged.";
+}
+const presets = [[0.05, "0.05"], [-0.5, "-0.5"], [1000, "1,000"], [-145480, "-145,480"], [35076960, "35,076,960"]];
+$("calc-presets").innerHTML = presets.map(([v, l]) => `<button type="button" data-v="${v}">${l}</button>`).join("");
+$("calc-presets").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { $("calc-in").value = b.dataset.v; calc(); } });
+$("calc-in").addEventListener("input", calc);
+calc();
+
+/* histograms */
+/* bars: [{f: height 0-1, cls, tip}], yLines: [{f, l}], xTicks: [{f: position 0-1, l}] */
+function histSvg(el, bars, yLines, xTicks) {
+  const W = Math.max(280, Math.round(el.clientWidth || 640)), H = 250;
+  const L = 48, R = W - 10, T = 8, B = 222, bw = (R - L) / bars.length;
+  const y = f => B - f * (B - T);
+  const lines = yLines.map(t => `<line class="g" x1="${L}" x2="${R}" y1="${y(t.f)}" y2="${y(t.f)}"/><text x="${L - 8}" y="${y(t.f) + 4}" text-anchor="end">${t.l}</text>`).join("");
+  const rects = bars.map((b, i) => {
+    const x = L + i * bw, h = b.f > 0 ? Math.max(1.5, b.f * (B - T)) : 0;
+    const mark = h ? `<rect class="b ${b.cls || ""}" x="${x + .5}" y="${B - h}" width="${Math.max(1, bw - 1)}" height="${h}"/>` : "";
+    return mark + (b.tip ? `<rect class="hit" x="${x}" y="${T}" width="${bw}" height="${B - T}" tabindex="0" data-tip="${b.tip}"/>` : "");
+  }).join("");
+  const ticks = xTicks.map(t => `<text x="${L + t.f * (R - L)}" y="${B + 18}" text-anchor="middle">${t.l}</text>`).join("");
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Histogram">${lines}${rects}<line class="a" x1="${L}" x2="${R}" y1="${B}" y2="${B}"/>${ticks}</svg>`;
+}
+function drawBefore() {
+  const c = new Array(60).fill(0); c[0] = 22086; c[9] = 1; c[59] = 1;
+  const top = Math.log10(30000);
+  const f = n => n ? Math.max(.3, Math.log10(n + 1)) / top : 0;
+  const bars = c.map((n, i) => ({ f: f(n), cls: i ? "clip" : "", tip: n ? `${n.toLocaleString("en-US")} ${n > 1 ? "companies" : "company"}${i === 9 ? ", about 5.3 million" : i === 59 ? ", about 35.1 million" : ", everyone else"}` : "" }));
+  const pos = v => (v + 145480) / (35076960 + 145480);
+  histSvg($("c-before"), bars, [[1, "1"], [100, "100"], [10000, "10k"]].map(([v, l]) => ({ f: f(v), l })),
+    [[0, "0"], [1e7, "10M"], [2e7, "20M"], [3e7, "30M"]].map(([v, l]) => ({ f: pos(v), l })));
+}
+drawBefore();
+const HN = {
+  net_profit_margin: "A sharp peak just above 0 with a long tail to the left. Most companies earn a small margin, and a long tail of companies lose far more than their revenue. That left tail is real.",
+  ebitda_margin: "The same shape as net margin, on fewer companies because 65% have no value.",
+  asset_turnover: "A tall bar at 0, a broad hump around 0.4, and a small clipped spike at the right end. There is no left spike, because the 1st percentile is 0. The first bar holds 3,037 companies and only 1,941 of them are exact zeros. The rest have very low turnover, such as banks. So the notebook's note that this bar is the zero-revenue companies is mostly true, not fully."
+};
+let histRatio = "net_profit_margin";
+function drawHist(r) {
+  histRatio = r;
+  const H = D.hist[r], max = Math.max(...H.counts), n = H.counts.length;
+  const step = max > 4000 ? 2000 : 1000, yLines = [];
+  for (let v = step; v < max; v += step) yLines.push({ f: v / max, l: v.toLocaleString("en-US") });
+  const bars = H.counts.map((c, i) => {
+    const a = H.edges[i], b = H.edges[i + 1];
+    const clip = (i === 0 && r !== "asset_turnover") || i === n - 1;
+    const zero = i === 0 && r === "asset_turnover";
+    const note = clip ? "\nIncludes the clipped companies" : zero ? "\n1,941 of these are exact zeros" : "";
+    return { f: c / max, cls: clip ? "clip" : zero ? "zero" : "", tip: `${c.toLocaleString("en-US")} companies\nSigned log ${a.toFixed(2)} to ${b.toFixed(2)}${note}` };
+  });
+  const lo = H.edges[0], hi = H.edges[n], s = hi - lo > 4 ? 1 : .25, ticks = [];
+  for (let v = Math.ceil(lo / s) * s; v <= hi + 1e-9; v += s) ticks.push({ f: (v - lo) / (hi - lo), l: +v.toFixed(2) });
+  histSvg($("c-hist"), bars, yLines, ticks);
+  $("hist-legend").innerHTML = `<span><i style="background:var(--s1);border-radius:2px"></i>Companies</span><span><i style="background:var(--s2);border-radius:2px"></i>Clipped end, about 1%</span>` +
+    (r === "asset_turnover" ? `<span><i style="background:var(--s3);border-radius:2px"></i>Zero or near-zero turnover</span>` : "");
+  $("hist-note").textContent = HN[r];
+}
+const ratioTabs = R.map(r => [r, RN[r]]);
+tabs("hist-tabs", ratioTabs, "net_profit_margin", drawHist);
+drawHist("net_profit_margin");
+if (window.ResizeObserver) {
+  let lastW = 0;
+  new ResizeObserver(() => {
+    const w = Math.round($("c-hist").clientWidth);
+    if (w && w !== lastW) { lastW = w; drawBefore(); drawHist(histRatio); }
+  }).observe($("c-hist"));
+}
+
+/* industry ranges */
+const sym = x => Math.abs(x) <= 1 ? x : Math.sign(x) * (1 + Math.log10(Math.abs(x)));
+const NOTES = {
+  net_profit_margin: ["Most industries sit on the all-company median at about 0.04, so they look alike.",
+    "Three stand out on the high side: Financial Services, REITs and Banks at about 0.25. The Banks line is short, so banks are consistent. The Financial Services line is long, so that group is mixed.",
+    "Pharma is the clear low outlier. Its line reaches about -3, so a quarter of its companies lose more than three times their revenue. Health Care, Media and Software also have long left lines, so they contain many loss-making companies, while their medians stay near 0."],
+  ebitda_margin: ["REITs are the most clearly separated at the top. High margins with low turnover fit a business that rents out assets (hypothesis).",
+    "Pharma is lowest, at about -1.",
+    "Materials is the interesting one. Its median is normal (0.08) but its line stretches to about -2.8. This fits a mix of ordinary producers and explorers with almost no revenue (hypothesis)."],
+  asset_turnover: ["This plot has the widest real spread, and it reads like a ranking of business models.",
+    "Retail is at the top. Consumer Staples Retail sits at 1.69, with a line that clears most other industries. Retailers sell through their stock quickly.",
+    "Finance and property are at the bottom. Banks, REITs, Financial Services and Real Estate have huge balance sheets compared with revenue. The Banks line is almost a dot.",
+    "The middle overlaps heavily. Technology Hardware (0.630), Software (0.613) and Capital Goods (0.612) have nearly the same median and overlapping lines. This is why the classifier gets little help here.",
+    "The Materials and Pharma lines start at about 0. This is the zero-revenue group from Figure 1."]
+};
+let rangeRatio = "asset_turnover", pins = ["Software & Services", "Financial Services"];
+function drawRange() {
+  const r = rangeRatio, T = D.ranges[r], log = r !== "asset_turnover";
+  const order = Object.keys(T).sort((a, b) => T[b].median - T[a].median);
+  const f = log ? sym : x => x;
+  const lo = Math.min(...order.map(i => T[i].q1)), hi = Math.max(...order.map(i => T[i].q3));
+  const pad = (f(hi) - f(lo)) * .04, a = f(lo) - pad, b = f(hi) + pad;
+  const pos = x => pct(f(x), a, b);
+  const raw = log ? [-10, -3, -1, -.5, 0, .5, 1] : [0, .5, 1, 1.5, 2];
+  const ticks = raw.filter(t => f(t) >= a && f(t) <= b).map(t => ({ v: t, l: String(t) }));
+  const row = i => {
+    const t = T[i], p = pins.indexOf(i);
+    return `<button type="button" class="row ${p >= 0 ? "pin" + p : ""}" data-i="${i}" aria-pressed="${p >= 0}" data-tip="${i}\nMedian ${t.median.toFixed(3)}\nMiddle 50%: ${t.q1.toFixed(3)} to ${t.q3.toFixed(3)}\n${t.n.toLocaleString("en-US")} companies with a value"><span class="lab">${sn(i)}</span><span class="track"><span class="span" style="left:${pos(t.q1)}%;width:${pos(t.q3) - pos(t.q1)}%"></span><span class="dot" style="left:${pos(t.median)}%"></span></span></button>`;
+  };
+  $("c-range").innerHTML = order.map(row).join("") + gridAxis(ticks, pos, [D.overall_median[r]]) + axisRow(ticks, pos);
+  const [x, y] = pins;
+  let text = "";
+  if (x && y) {
+    const A = T[x], B = T[y], over = A.q1 <= B.q3 && B.q1 <= A.q3;
+    text = `<b>${sn(x)}</b> median ${A.median.toFixed(3)}, <b>${sn(y)}</b> median ${B.median.toFixed(3)}. Their middle 50% ranges ${over ? "overlap, so this ratio alone cannot tell them apart well." : "do not overlap, so this ratio separates them well."}`;
+  } else if (x) text = `<b>${sn(x)}</b> median ${T[x].median.toFixed(3)}. Pick a second industry to compare.`;
+  else text = "Click two industries to compare them.";
+  $("range-read").innerHTML = text;
+  $("range-axis-note").textContent = log ? "This axis is symlog: linear from -1 to 1, logarithmic beyond. Without it, a few deeply negative industries would squash the rest. Equal distances on the far left are not equal differences, so read the tick labels." : "This axis is linear.";
+  $("range-notes").innerHTML = NOTES[r].map(n => `<li>${n}</li>`).join("");
+  tbl("t-range", ["Industry", "Q1", "Median", "Q3", "Companies"], order.map(i => [sn(i), T[i].q1.toFixed(3), T[i].median.toFixed(3), T[i].q3.toFixed(3), T[i].n.toLocaleString("en-US")]), [1, 2, 3, 4]);
+}
+$("c-range").addEventListener("click", e => {
+  const b = e.target.closest("button.row"); if (!b) return;
+  const i = b.dataset.i;
+  pins = pins.includes(i) ? pins.filter(p => p !== i) : [...pins, i].slice(-2);
+  drawRange();
+  const again = [...$("c-range").querySelectorAll("button.row")].find(el => el.dataset.i === i);
+  if (again) again.focus();
+});
+tabs("range-tabs", ratioTabs, rangeRatio, r => { rangeRatio = r; drawRange(); });
+drawRange();
+
+/* confused pairs */
+const PAIRS = [
+  ["Software vs Financial Services", .24, .24, .81, "Clear separation on all three"],
+  ["Health Care vs Pharma", .57, .64, .69, "Moderate"],
+  ["Capital Goods vs Materials", .56, .57, .65, "Moderate on turnover"],
+  ["Energy vs Materials", .55, .65, .55, "Moderate on EBITDA"],
+  ["Discretionary Retail vs Durables & Apparel", .46, .48, .64, "Moderate on turnover"],
+  ["Semiconductors vs Technology Hardware", .55, .55, .38, "Moderate on turnover"],
+  ["Commercial Services vs Software", .59, .61, .53, "Weak"],
+  ["Automobiles vs Capital Goods", .48, .44, .60, "Weak"],
+  ["Technology Hardware vs Capital Goods", .45, .39, .52, "Weak to moderate on EBITDA"],
+  ["Technology Hardware vs Software", .56, .51, .52, "Almost none"],
+  ["Commercial Services vs Capital Goods", .49, .50, .53, "None"]
+];
+(function auc() {
+  const pos = v => pct(v, -.01, .34);
+  const ticks = [{ v: 0, l: "0" }, { v: .1, l: "0.1" }, { v: .2, l: "0.2" }, { v: .3, l: "0.3" }];
+  $("c-auc").innerHTML = PAIRS.map(p => `<div class="row" tabindex="0" data-tip="${p[0]}\nNet margin AUC ${p[1].toFixed(2)}\nEBITDA AUC ${p[2].toFixed(2)}\nTurnover AUC ${p[3].toFixed(2)}"><span class="lab">${p[0]}</span><span class="track">${[1, 2, 3].map(k => `<i class="mk m${k - 1}" style="left:${pos(Math.abs(p[k] - .5))}%"></i>`).join("")}</span></div>`).join("") +
+    gridAxis(ticks, pos, [.2]) + axisRow(ticks, pos);
+  tbl("t-auc", ["Pair", "Net margin", "EBITDA", "Turnover", "Reading"], PAIRS.map(p => [p[0], p[1].toFixed(2), p[2].toFixed(2), p[3].toFixed(2), p[4]]), [1, 2, 3]);
+})();
+(function ens() {
+  const items = [["Embedding only", .6423], ["Embedding + country", .6521], ["Embedding + country + financials", .6516]];
+  const pos = v => pct(v, .625, .67);
+  const ticks = [.63, .64, .65, .66].map(v => ({ v, l: v.toFixed(2) }));
+  $("c-ens").innerHTML = items.map(([l, v]) => `<div class="row" tabindex="0" data-tip="${l}: ${v.toFixed(4)}"><span class="lab">${l}</span><span class="track"><span class="whisk" style="left:${pos(v - .01)}%;width:${pos(v + .01) - pos(v - .01)}%"></span><span class="dot" style="left:${pos(v)}%;background:var(--s1)"></span><span class="val" style="left:${pos(v + .01)}%">${v.toFixed(4)}</span></span></div>`).join("") +
+    gridAxis(ticks, pos) + axisRow(ticks, pos);
+})();
+
+/* lists */
+const LIMITS = [
+  ["\"Epsilon squared\" is mislabelled.", "The code's <code>(H - k + 1) / (n - k)</code> is normally called eta squared. Epsilon squared is usually <code>H / (n - 1)</code>. Here the two are almost equal (0.2531 versus 0.2539 for asset turnover), and the 0.01 / 0.06 / 0.14 guide belongs to eta squared, so the conclusion does not change, but the name should be corrected."],
+  ["The EBITDA missing flag mixes two things.", "<code>inf</code> EBITDA becomes <code>NaN</code> in cleaning, so zero-revenue companies also count as EBITDA missing. Part of Materials' 72% is really its 24% zero revenue. This does not explain Semiconductors, with 75% and only 2% zero revenue."],
+  ["Zero-revenue companies are treated differently per ratio.", "They disappear from margin statistics but stay in asset turnover as 0. So for Materials, the margin median describes only companies with revenue, while its turnover line starts at 0."],
+  ["The EBITDA effect size comes from a selected group.", "It uses 9,420 companies, 35% of the total, and who is included depends on the industry. So comparing 0.190 with 0.253 is not comparing the same companies."],
+  ["The imputation test hides values at random, but real gaps are not random.", "The errors describe how well we fill a random known value, not necessarily a truly missing one. It also uses one random split, so a 0.7% difference could easily change."],
+  ["\"Real but unhelpful\" is an inference.", "There is no revenue column, so we cannot check it directly. Asset turnover is indirect evidence."],
+  ["Median differences are not class separation.", "21 of 33 tests are significant, but most AUCs are between 0.40 and 0.60."],
+  ["Each AUC uses only one ratio.", "A pair with weak AUC on every ratio could still be separable by a combination, and the missing and zero-revenue flags are not tested in the pair analysis. Materials, with 24% zero revenue, is an example where the flag could add something."],
+  ["The confused pairs are hard-coded.", "<code>02_final_ensembles.ipynb</code> has no confusion matrix, so the list cannot be regenerated from it. Know where the list came from before you present it."],
+  ["Negative turnover is called a data error, but is probably real.", "The check in the data section points to negative revenue. The turnover is set to missing, but those 117 companies keep their margins, where a loss can appear as a positive number. That is 0.4% of companies, but 76 of them are in Financial Services."],
+  ["AUC counts ties as half.", "Precisely, AUC = P(first &gt; second) + ½ P(equal). This matters for asset turnover, where 1,941 companies are exactly 0."],
+  ["\"Same rules\" in notebook 02 is nearly true.", "Notebook 03 makes one combined <code>zero_revenue</code> flag. <code>ExtraFeatures</code> makes one flag per ratio, so a <code>0/0</code> margin is not flagged on the margin column there, only on asset turnover."],
+  ["The financial result from notebook 02 is one split only.", "<code>RUN_FULL_CV</code> is off, so \"financials add nothing\" rests on a quick test with one MLP seed."],
+  ["Are the financials available at prediction time?", "According to notebook 02, the financial file only covers training companies, and <code>FINAL_FEATURES = None</code> is the current setting. So this analysis helps us understand the data but may not enter the submitted model."]
+];
+$("limits-list").innerHTML = LIMITS.map(([a, b]) => `<li><b>${a}</b> ${b}</li>`).join("");
+const QA = [
+  ["Why not delete outliers?", "15% of margins are beyond the fence, they are mostly real companies, and the model must predict every company."],
+  ["Why not fill by industry?", "It uses the label, which is unknown at test time."],
+  ["Why flag zero revenue?", "2,005 companies, up to 24% of an industry. A median would hide that."],
+  ["Why not ANOVA?", "It compares means and assumes normal data. The mean net margin is 1,806 and the median is 0.038."],
+  ["Why report effect sizes?", "All tests here have tiny p-values, so p cannot rank the ratios. The effect size can."],
+  ["Why 3 × IQR and not 1.5?", "1.5 would flag even more in heavy-tailed data. 3 is the usual far-out fence."],
+  ["Why is using all rows acceptable here?", "Description only. Model statistics are learned on training rows in <code>ExtraFeatures</code>."],
+  ["Why signed log and not plain log?", "7,521 net margins are negative."],
+  ["Why is Bonferroni needed?", "33 tests at 5% would give about 1.65 false positives even with no real effect."],
+  ["If industries differ, why do financials not help?", "They differ mostly at the extremes, which the embedding already handles. Confused pairs are usually similar businesses, so their ratios are similar too."]
+];
+$("qa").innerHTML = QA.map(([q, a]) => `<div><b>${q}</b><span>${a}</span></div>`).join("");
+const CONCL = [
+  ["Zero revenue:", "Supported. 96.8% of <code>inf</code> net margins have asset turnover of exactly 0."],
+  ["Missing data:", "Not random. Zero revenue is tied to industry (V = 0.32), EBITDA missing less so (0.23), and no financial row barely (0.08). Materials and Pharma make business sense. The high EBITDA missing share in Semiconductors and Technology Hardware has no obvious business reason."],
+  ["Filling gaps:", "Country wins, but by under 1% on margins and 6% on asset turnover. That does not clearly justify the extra rule, especially as country is already a feature."],
+  ["Outliers:", "Mostly real values caused by tiny revenue, though this is inferred rather than proven. Net margin std went from 238,733 to 0.86, and the mean from 1,806 to -0.17."],
+  ["Differences:", "Asset turnover separates industries best (0.253), then EBITDA margin (0.190), then net margin (0.126)."],
+  ["For the classifier:", "Software vs Financial Services separates well (AUC 0.81). Commercial Services vs Capital Goods does not separate at all, and Technology Hardware vs Software barely does (best AUC 0.56). In notebook 02, financials added -0.0005 beyond country on one split, which fits this picture."]
+];
+$("concl").innerHTML = CONCL.map(([a, b]) => `<li><b>${a}</b> ${b}</li>`).join("");
+
+/* tooltip */
+const tip = $("tip");
+function showTip(el, x, y) {
+  tip.textContent = el.dataset.tip; tip.hidden = false;
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.max(8, Math.min(innerWidth - w - 8, x + 14)) + "px";
+  tip.style.top = (y - h - 12 < 8 ? y + 16 : y - h - 12) + "px";
+}
+document.addEventListener("mousemove", e => {
+  const el = e.target.closest && e.target.closest("[data-tip]");
+  if (el) showTip(el, e.clientX, e.clientY); else tip.hidden = true;
+});
+document.addEventListener("focusin", e => {
+  const el = e.target.closest && e.target.closest("[data-tip]");
+  if (el && el.matches(":focus-visible")) { const r = el.getBoundingClientRect(); showTip(el, r.left + r.width / 2, r.top); }
+});
+document.addEventListener("focusout", () => { tip.hidden = true; });
+</script>
